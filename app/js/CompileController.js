@@ -41,6 +41,14 @@ module.exports = CompileController = {
       if (req.params.user_id != null) {
         request.user_id = req.params.user_id
       }
+      if (!req.params.user_id && request.compiler === 'lualatex') {
+        logger.warn(
+          { project_id: request.project_id },
+          'refusing to run lualatex for unauthenticated user'
+        )
+        res.sendStatus(418)
+        return
+      }
       return ProjectPersistenceManager.markProjectAsJustAccessed(
         request.project_id,
         function (error) {
