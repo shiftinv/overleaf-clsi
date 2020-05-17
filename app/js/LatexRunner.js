@@ -45,6 +45,7 @@ module.exports = LatexRunner = {
     if (!timeout) {
       timeout = 60000
     } // milliseconds
+    flags = []
 
     logger.log(
       {
@@ -194,7 +195,9 @@ module.exports = LatexRunner = {
       '-auxdir=$COMPILE_DIR',
       '-outdir=$COMPILE_DIR',
       '-synctex=1',
-      '-interaction=batchmode'
+      '-interaction=batchmode',
+      '-no-parse-first-line',
+      '-shell-restricted'
     ]
     if (flags) {
       args = args.concat(flags)
