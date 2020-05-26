@@ -82,6 +82,10 @@ module.exports = DockerRunner = {
         o.replace('$COMPILE_DIR', '/compile')
       )
     )
+    for (key in environment) {
+      value = environment[key]
+      environment[key] = value.toString().replace('$COMPILE_DIR', directory)
+    }
     if (image == null) {
       ;({ image } = Settings.clsi.docker)
     }

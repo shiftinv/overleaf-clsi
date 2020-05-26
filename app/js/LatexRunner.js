@@ -47,6 +47,8 @@ module.exports = LatexRunner = {
     } // milliseconds
     flags = []
 
+    environment['TEXMFOUTPUT'] = '$COMPILE_DIR'
+
     logger.log(
       {
         directory,
