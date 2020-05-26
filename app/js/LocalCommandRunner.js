@@ -53,6 +53,10 @@ module.exports = CommandRunner = {
       value = environment[key]
       env[key] = value
     }
+    for (key in env) {
+      value = env[key]
+      env[key] = value.toString().replace('$COMPILE_DIR', directory)
+    }
 
     // run command as detached process so it has its own process group (which can be killed if needed)
     const proc = spawn(command[0], command.slice(1), { cwd: directory, env })
