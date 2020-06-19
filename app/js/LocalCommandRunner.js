@@ -61,8 +61,9 @@ module.exports = CommandRunner = {
     // run command as detached process so it has its own process group (which can be killed if needed)
     const proc = spawn(command[0], command.slice(1), { cwd: directory, env })
 
-    let stdout = ''
+    let stdout = '', stderr = ''
     proc.stdout.setEncoding('utf8').on('data', (data) => (stdout += data))
+    proc.stderr.setEncoding('utf8').on('data', (data) => (stderr += data))
 
     proc.on('error', function (err) {
       logger.err(
@@ -86,7 +87,7 @@ module.exports = CommandRunner = {
         err.code = code
         return callback(err)
       } else {
-        return callback(null, { stdout: stdout })
+        return callback(null, { stdout: stdout, stderr: stderr })
       }
     })
 
