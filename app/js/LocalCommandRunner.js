@@ -41,7 +41,7 @@ module.exports = CommandRunner = {
       arg.toString().replace('$COMPILE_DIR', directory)
     )
     logger.log({ project_id, command, directory }, 'running command')
-    logger.warn('timeouts and sandboxing are not enabled with CommandRunner')
+    logger.warn('sandboxing is not enabled with CommandRunner')
 
     // merge environment settings
     const env = {}
@@ -65,7 +65,18 @@ module.exports = CommandRunner = {
     proc.stdout.setEncoding('utf8').on('data', (data) => (stdout += data))
     proc.stderr.setEncoding('utf8').on('data', (data) => (stderr += data))
 
+    let timedOut = false
+    const timeoutId = setTimeout(() => {
+      timedOut = true
+      logger.log({ project_id, pid: proc.pid }, 'timeout reached, killing process')
+      CommandRunner.kill(proc.pid, (err) => {
+        if (err)
+          logger.warn({ err, project_id, pid: proc.pid }, 'failed to kill process')
+      })
+    }, timeout)
+
     proc.on('error', function (err) {
+      clearTimeout(timeoutId)
       logger.err(
         { err, project_id, command, directory },
         'error running command'
@@ -76,7 +87,12 @@ module.exports = CommandRunner = {
     proc.on('close', function (code, signal) {
       let err
       logger.info({ code, signal, project_id }, 'command exited')
-      if (signal === 'SIGTERM') {
+      clearTimeout(timeoutId)
+      if (timedOut) {
+        err = new Error('timed out')
+        err.timedout = true
+        return callback(err)
+      } else if (signal === 'SIGTERM') {
         // signal from kill method below
         err = new Error('terminated')
         err.terminated = true
