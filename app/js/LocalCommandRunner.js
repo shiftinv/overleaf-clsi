@@ -85,26 +85,22 @@ module.exports = CommandRunner = {
     })
 
     proc.on('close', function (code, signal) {
-      let err
+      let err = null
       logger.info({ code, signal, project_id }, 'command exited')
       clearTimeout(timeoutId)
       if (timedOut) {
         err = new Error('timed out')
         err.timedout = true
-        return callback(err)
       } else if (signal === 'SIGTERM') {
         // signal from kill method below
         err = new Error('terminated')
         err.terminated = true
-        return callback(err)
       } else if (code === 1) {
         // exit status from chktex
         err = new Error('exited')
         err.code = code
-        return callback(err)
-      } else {
-        return callback(null, { stdout: stdout, stderr: stderr })
       }
+      callback(err, { stdout: stdout, stderr: stderr })
     })
 
     return proc.pid

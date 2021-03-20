@@ -100,6 +100,8 @@ module.exports = LatexRunner = {
       compileGroup,
       function (error, output) {
         delete ProcessTable[id]
+        // always record output files, regardless of errors
+        LatexRunner.writeLogOutput(project_id, directory, output, () => {
         if (error != null) {
           return callback(error)
         }
@@ -135,8 +137,6 @@ module.exports = LatexRunner = {
             }
           }
         }
-        // record output files
-        LatexRunner.writeLogOutput(project_id, directory, output, () => {
           return callback(error, output, stats, timings)
         })
       }
